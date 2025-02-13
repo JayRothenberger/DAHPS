@@ -13,7 +13,7 @@ def clean_dir(path):
             os.remove(os.path.join(path,f))
 
 
-def sync_parameters(args, rank, agent):
+def sync_parameters(rank, agent):
     """
     Synchronizes the parameters between the ranks of a process that is performing
     a single model training run.
@@ -38,7 +38,7 @@ def sync_parameters(args, rank, agent):
     hyperparameter search agent class instance
     """
     # the path to the hyperparameter search directory
-    path = args.path
+    path = agent.root
     # generate and broadcast a unique integer - this will specify a path
     # broadcast the integer
     agree = random.randrange(0, 2**32)
