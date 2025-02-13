@@ -2,11 +2,18 @@ import random
 import time
 import os
 import pickle
-
+import arrow
+import pathlib
 import torch
 
+# remove all the files older than a day
+def clean_dir(path):
+    for f in os.listdir(path):
+        if os.stat(os.path.join(path,f)).st_mtime < (time.time() - 86400):
+            os.remove(os.path.join(path,f))
 
-def sync_parameters(args, rank, search_space, agent_class):
+
+def sync_parameters(args, rank, agent):
     """
     Synchronizes the parameters between the ranks of a process that is performing
     a single model training run.
@@ -32,17 +39,10 @@ def sync_parameters(args, rank, search_space, agent_class):
     """
     # the path to the hyperparameter search directory
     path = args.path
-    # 1. create the agent
-    if rank == 0:
-        try:
-            agent = agent_class(path, search_space, args)
-        except SystemError as e:
-            time.sleep(random.randrange(0, 60))
-            agent = agent_class(path, search_space, args)
-    # 2. generate and broadcast a unique integer - this will specify a path
+    # generate and broadcast a unique integer - this will specify a path
     # broadcast the integer
     agree = random.randrange(0, 2**32)
-    agree = torch.Tensor([agree]).to(rank % torch.cuda.device_count())
+    agree = torch.Tensor([agree]).to(torch.cuda.current_device())
 
     torch.distributed.broadcast(agree, 0)
     torch.distributed.all_reduce(agree)
@@ -50,17 +50,22 @@ def sync_parameters(args, rank, search_space, agent_class):
 
     if rank == 0:
         try:
-            os.mkdir(os.path.join(path, f"{agree}"))
+            os.mkdir(os.path.join(path, "tmp"))
         except Exception as e:
             print(e)
         print(path)
-        with open(os.path.join(path, f"{agree}/hparams.pkl"), "wb") as fp:
+        with open(os.path.join(path, f"tmp/{agree}.pkl"), "wb") as fp:
             pickle.dump(agent, fp)
     else:
-        time.sleep(20)
+        # wait for the root process to make the pickle file
+        while not os.path.exists(os.path.join(path, f"tmp/{agree}.pkl")):
+            time.sleep(1)
+
+    # remove any tmp files older than a day
+    clean_dir(os.path.join(path, "tmp"))
 
     # load the mutual file which holds the hyperparameters
-    with open(os.path.join(path, f"{agree}/hparams.pkl"), "rb") as fp:
+    with open(os.path.join(path, f"tmp/{agree}.pkl"), "rb") as fp:
         agent = pickle.load(fp)
     # return the synchronized agent object
     return agent

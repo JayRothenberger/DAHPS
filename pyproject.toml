@@ -9,10 +9,9 @@ authors = [
 ]
 description = "A Distributed Asynchonous Hyperparameter Search Scheduler for SLURM systems"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "torch",
-    "
             ]
 classifiers = [
     "Programming Language :: Python :: 3",

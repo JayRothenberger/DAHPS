@@ -1,0 +1,15 @@
+Metadata-Version: 2.2
+Name: dahps
+Version: 0.0.1
+Summary: A Distributed Asynchonous Hyperparameter Search Scheduler for SLURM systems
+Author-email: Jay Rothenberger <jay.c.rothenberger@gmail.com>
+Project-URL: Homepage, https://github.com/JayRothenberger/DAHPS
+Project-URL: Issues, https://github.com/JayRothenberger/DAHPS/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Unix
+Classifier: Topic :: Scientific/Engineering :: Machine Learning
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: torch
