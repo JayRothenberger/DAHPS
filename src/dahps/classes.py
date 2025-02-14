@@ -23,7 +23,7 @@ class HPSearch(ABC):
         cur = con.cursor()
 
         try:
-            self.init_db(self, combinations, cur)
+            self.init_db(combinations, cur)
         except Exception as e:
             print('search already initialized, continuing where we left off...', e)
 
@@ -60,14 +60,14 @@ class HPSearch(ABC):
     def init_db(self, combinations, cur):
         raise NotImplementedError('init_db is not implemented as part of the HPSearch abstract class')
 
-    def to_namespace(self, combination):
+    def to_namespace(self, combination, args=None):
         try:
             combination = json.loads(combination)
         except TypeError as e:
             print("no combination left to load...")
             return None
         
-        args = vars(self.args)
+        args = vars(args) if args is not None else dict()
         args.update(combination)
         return Namespace(**args)
 
