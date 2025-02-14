@@ -10,7 +10,6 @@ import os
 from .parse_config import parse_parameter_config
 
 class HPSearch(ABC):
-    @abstractmethod
     def __init__(self, root, combinations):
         self.root = root
         self.combination = None
@@ -26,14 +25,15 @@ class HPSearch(ABC):
         try:
             self.init_db(self, combinations, cur)
         except Exception as e:
-            print('search already initialized, continuing where we left off...')
+            print('search already initialized, continuing where we left off...', e)
 
         con.commit()
         cur.close()
 
         self.get_new_combination()
-    
-    def from_namespace(self, root, search_space, args, k=None):
+
+    @classmethod
+    def from_namespace(cls, root, search_space, args, k=None):
         arg_list = tuple([vars(args)[key] for key in search_space])
         if k is not None:
             arg_product = random.choices(list(product(*arg_list)), k=k)
@@ -45,15 +45,16 @@ class HPSearch(ABC):
         for args in arg_product:
             combinations.append({key: value for key, value in zip(search_space, args)})
 
-        return self.__init__(root, combinations)
+        return cls(root, combinations)
     
-    def from_config(self, root, config, k=None):
+    @classmethod
+    def from_config(cls, root, config, k=None):
         combinations = parse_parameter_config(config)
         
         if k is not None:
             combinations = random.choices(combinations, k=k)
 
-        return self.__init__(root, combinations)
+        return cls(root, combinations)
     
     @abstractmethod
     def init_db(self, combinations, cur):
