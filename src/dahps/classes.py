@@ -60,9 +60,10 @@ class HPSearch(ABC):
     def init_db(self, combinations, cur):
         raise NotImplementedError('init_db is not implemented as part of the HPSearch abstract class')
 
-    def to_namespace(self, combination, args=None):
+    def update_namespace(self, args=None):
+
         try:
-            combination = json.loads(combination)
+            combination = json.loads(self.combination)
         except TypeError as e:
             print("no combination left to load...")
             return None
