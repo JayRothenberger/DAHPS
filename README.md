@@ -1,6 +1,14 @@
+# Distributed Asynchronous Hyperparameter Search management utility for SLURM
+
+This module serves as a method of coordinating hyperparameter search runs on a distributed system with access to a reliable shared storage system.  Because it utilizes sqlite3 as a backend it cannot guarantee Availability, but it does guarantee Consistency.  It also guarantees Partition Tolerance as long as the underlying shared storage system is.  In practice the Availability is sufficient for the vast majority of cases as long as the elements of the distributed system are networked such that the write latency is below ~2s.  This rarely is an issue.
+
+This module can be used with non-SLURM allocated systems, but has only been tested with SLURM systems.  In principle the only dependencies of the module are PyTorch, it does not rely on any particular resource management utility.
+
+
 ### Usage Example:
 
-```python
+```python 
+# config.py
 
 # handles the low resolution datasets
 low_res_config = {
@@ -109,7 +117,22 @@ experiment_config = {
 ```
 
 ```python
+import torch
 from config import experiment_config as config
+
+
+def training_process(args, rank, world_size):
+
+    ...
+
+    wandb.init(...)
+
+    ...
+
+    # return a metric that orders the performance of the models and the model state
+
+    return states, metric
+
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Shearlet NN")
@@ -126,7 +149,7 @@ def create_parser():
 
 
 def main(args, rank, world_size):
-    setup(rank, world_size)
+    ...
 
     device = rank % torch.cuda.device_count()
     print(f'rank {rank} running on device {device} (of {torch.cuda.device_count()})')
@@ -144,13 +167,13 @@ def main(args, rank, world_size):
         print('saving checkpoint')
         agent.save_checkpoint(states)
 
-    print('cleanup')
-    cleanup()
+    ...
 
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
 
+    # environment variables from torchrun
     world_size = int(os.environ["WORLD_SIZE"])
     rank = int(os.environ["RANK"])
     torch.multiprocessing.set_start_method("spawn")
