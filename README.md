@@ -119,16 +119,14 @@ experiment_config = {
 ```python
 import torch
 from config import experiment_config as config
+from dahps import DistributedAsynchronousRandomSearch as DARS
+from dahps.torch_utils import sync_parameters
 
 
 def training_process(args, rank, world_size):
 
     ...
-
-    wandb.init(...)
-
-    ...
-
+    
     # return a metric that orders the performance of the models and the model state
 
     return states, metric
@@ -161,11 +159,12 @@ def main(args, rank, world_size):
 
     args = agent.to_namespace(agent.combination)
 
-    states = training_process(args, rank, world_size)
+    states, metric = training_process(args, rank, world_size)
 
     if rank == 0:
         print('saving checkpoint')
         agent.save_checkpoint(states)
+        agent.finish_combination(metric)
 
     ...
 
