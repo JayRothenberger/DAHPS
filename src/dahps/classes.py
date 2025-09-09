@@ -76,6 +76,12 @@ class HPSearch(ABC):
         with open(self.path, "wb") as fp:
             torch.save(states, fp)
 
+    def load_checkpoint(self):
+        with open(self.path, "rb") as fp:
+            state_dict = torch.load(fp)
+        
+        return state_dict
+
     @abstractmethod
     def finish_combination(self, metric_value):
         raise NotImplementedError('finish_combination is not implemented as part of the HPSearch abstract class')
