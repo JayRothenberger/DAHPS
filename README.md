@@ -179,3 +179,9 @@ if __name__ == "__main__":
 
     main(args, rank, world_size)
 ```
+
+## Usage/Behavior Notes:
+- The config is parsed as a tree using the json structure where each node has a child for each element in the "values" array.  In this way you can specify hyperparameter search spaces which are not hyperrectangles and some "values" can correspond to disjoint sets of hyperparameters at the next level.  For example, if all runs with dropout 0.25 should have l2 regularization > 1e-4 you could specify this in addition to runs with dropout 0.1 having l2 regularization < 1e-4 in the same search space.
+- use the "default" key at each level to specify the children of all nodes which are not directly specified by their value.
+- Modifications to the config will not be propagated after initializing a hyperparameter search directory.  A new directory must be specified for each config.
+- The possible hyperparameter combinations are parsed as the sum of the product of all paths from root to leaf of the json specification.
