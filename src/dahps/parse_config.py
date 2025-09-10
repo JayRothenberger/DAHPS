@@ -52,6 +52,12 @@ def parse_parameter_config(config):
     root = config["root"]
     paths = bfs_paths(root, [{}])
 
+    if config.get("constants") is not None:
+        constants = config["constants"]
+
+        for p in paths:
+            p.update(constants)
+
     print(
         f"found {len(paths)} specified configurations of which {len(set([tuple(sorted([(k, v) for k, v in p.items()], key=lambda k: k[0])) for p in paths]))} are unique"
     )
