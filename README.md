@@ -7,6 +7,8 @@ This module can be used with non-SLURM allocated systems, but has only been test
 
 ### Usage Example:
 
+Every time the script is launched it will select a different hyperparameter combination to run that time from the space of parameterizations defined in the config.  If a run crashes (fails to execute `finish_combination`) it will stay in an `in_progress` state and will be picked up by a future run of the script after all other combinations have been run.  The `in_progress` queue is FIFO.  Once there are no new combinations to try and the `in_progress` queue has been exhausted all other runs of the script will exit on `sync_parameters`.
+
 ```python 
 # config.py
 
@@ -126,7 +128,7 @@ from dahps.torch_utils import sync_parameters
 def training_process(args, rank, world_size):
 
     ...
-    
+
     # return a metric that orders the performance of the models and the model state
 
     return states, metric
