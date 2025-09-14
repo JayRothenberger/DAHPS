@@ -16,7 +16,7 @@ class HPSearch(ABC):
         self.path = None
         self.chkpt = None
 
-        if not os.path.isdir(root):
+        if not os.path.isdir(root) and int(os.environ['RANK']) == 0:
             os.mkdir(root)
 
         con = sqlite3.connect(os.path.join(self.root, "registry.db"))
