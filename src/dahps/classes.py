@@ -6,6 +6,7 @@ from itertools import product
 import random
 import sqlite3
 import os
+import time
 
 from .parse_config import parse_parameter_config
 
@@ -18,6 +19,8 @@ class HPSearch(ABC):
 
         if not os.path.isdir(root) and int(os.environ['RANK']) == 0:
             os.mkdir(root)
+        else:
+            time.sleep(1)
 
         con = sqlite3.connect(os.path.join(self.root, "registry.db"))
         cur = con.cursor()
